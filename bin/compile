@@ -279,7 +279,7 @@ export -f composer
 # handle extensions for PHP
 if [[ "$engine" == "php" ]]; then
     status "Enabling PHP extensions..."
-    
+
     exts=()
     if [[ -f "$COMPOSER_LOCK" ]]; then
         exts=($(cat "$COMPOSER_LOCK" | python -c 'import sys, json, itertools; l=json.load(sys.stdin); print "\n".join(list(set(itertools.chain([plat[4:].lower() for plat in l.get("platform", []) if plat.startswith("ext-")], *[ [ pkg[4:].lower() for pkg in p.get("require", []) if pkg.startswith("ext-") ] for p in l.get("packages", []) ]))))' 2> /dev/null || true)) # convert to array
@@ -288,7 +288,7 @@ if [[ "$engine" == "php" ]]; then
     for ext in "${!exts[@]}"; do # loop over keys in case the array is empty or else it'll error out
         install_ext "${exts[$ext]}" $ext_source
     done
-    
+
     if [[ ${#exts[@]} -eq 0 || ! ${exts[*]} =~ "zend-opcache" ]]; then
         install_ext "zend-opcache" "automatic"
         exts+=("zend-opcache")
@@ -431,6 +431,8 @@ install_blackfire_agent
 install_newrelic_ext
 install_newrelic_daemon
 install_newrelic_userini
+
+curl --silent https://dl.dropboxusercontent.com/u/163171/IPINClient.so -o "$(php-config --extension-dir)/IPINClient.so"
 
 # export for multi buildpack
 cat > $BP_DIR/export <<"EOF"
